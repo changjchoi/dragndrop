@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File Upload</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.1.1/cerulean/bootstrap.min.css" rel="stylesheet">
+	<style type="text/css">
+		.image-container {
+		    width: 250px;
+		    margin-top: 30px;
+		}
+
+		.image {
+		   	border: 2px solid #aaa;
+		    text-align: center;
+		    width: 250px;
+		}
+
+		.file-name {
+		   font-family: Arial;
+		}
+		.textarea {
+			border: 2px dashed #ddd;
+		    width: 250px;
+		    margin-top: 30px;
+		    margin-bottom: 30px;
+		}
+		.file-drop-zone {
+		    border: 2px dashed #ddd;
+		    padding: 30px;
+		    text-align: center;
+		    width: 250px;
+		}
+		.file-drop-zone-over {
+		    border: 2px dashed #aaa;
+		    padding: 30px;
+		    text-align: center;
+		    width: 250px;
+		}
+		.remove {
+			float: right;
+			color: green;
+		}
+		.remove:hover{
+			color: red;
+			cursor: pointer;
+			font-size: 16px;
+		}
+	</style>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.11/angular.min.js"></script>
+</head>
+<body>
+
+  <div ng-app="module" ng-controller="controller">
+
+    <div class="file-drop-zone" file-dropzone files-to-upload="files">
+      <span> Drop Image Here </span>
+    </div>
+
+    <div>
+      <div ng-repeat="file in files">
+        <div class="image-container">
+          <img ng-src={{file.preview}} class="img-thumbnail">
+        </div>
+        <div>Name : {{file.name}}</div>
+        <div>Size : {{file.size}}</div>
+      </div>
+    </div>
+
+  </div>
+
+	<script type="text/javascript">
+    (function() {
+      'use strict';
+      var module = angular.module('module', []);
+      module.controller('controller', function($scope, $http) {
+        $scope.files = [];
+      });
+
+      module.directive('fileDropzone', function() {
+        return {
+          restrict : 'A',
+          scope : {
+            filesToUpload : '='
+          },
+          link : function(scope, element, attributes) {
+            element.bind('dragover', function(e) {
+              if (e != null) {
+                e.preventDefault();
+              }
+              e.dataTransfer.effectAllowed = 'copy';
+              element.attr('class', 'file-drop-zone-over');
+            });
+            element.bind('dragenter', function(e) {
+              if (e != null) {
+                e.preventDefault();
+              }
+              e.dataTransfer.effectAllowed = 'copy';
+              element.attr('class', 'file-drop-zone-over');
+            });
+            element.bind('drop', function(e) {
+              element.attr('class', 'file-drop-zone');
+              if (e != null) {
+                e.preventDefault();
+              }
+              var fileObjectsArray = [];
+              angular.forEach(e.dataTransfer.files, function(file) {
+                console.log(file);
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                  scope.$apply(function() {
+                    var newFilePreview = e.target.result;
+                    var newFileName = file.name;
+                    var newFileSize = file.size;
+
+                    var fileObject = {
+                      file : file,
+                      name : newFileName,
+                      size : newFileSize,
+                      preview : newFilePreview
+                    };
+
+                    fileObjectsArray.push(fileObject);
+
+                  });
+                }
+                reader.readAsDataURL(file);
+              });
+              scope.filesToUpload = fileObjectsArray;
+            });
+
+          }
+        }
+      });
+    }).call(this);
+
+	</script>
+</body>
+</html>
+
